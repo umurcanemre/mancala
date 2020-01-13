@@ -91,7 +91,7 @@ public final class Game {
 		}
 	}
 	
-	private Map.Entry<Integer,Boolean> sow(int stonesAtHand, int cell, String player,String opponent){
+	private Map.Entry<Integer,Boolean> sow_old(int stonesAtHand, int cell, String player,String opponent){
 		int lastEditedPosition= cell + 1;
 		for (lastEditedPosition = cell + 1; lastEditedPosition < MANCALA_POSITION
 				&& stonesAtHand > 0; lastEditedPosition++) {
@@ -122,9 +122,28 @@ public final class Game {
 		return new AbstractMap.SimpleEntry<Integer,Boolean>(lastEditedPosition,sowToOpponent);
 	}
 
-	private Map.Entry<Integer,Boolean> sow_new(int stonesAtHand, int cell, String player){
+	private Map.Entry<Integer,Boolean> sow(int stonesAtHand, int cell, String player,String opponent){
+		int lastEditedPosition= cell + 1;
 
-		return new AbstractMap.SimpleEntry<Integer,Boolean>(0,false);
+		boolean sowToTurnOwner = true;
+		while (stonesAtHand > 0) {
+			if (sowToTurnOwner) {
+				Map.Entry<Integer, Integer> sowResult = sowTurn(lastEditedPosition,stonesAtHand,player);
+				stonesAtHand = sowResult.getValue();
+				sowToTurnOwner = !(stonesAtHand > 0);
+				lastEditedPosition = sowResult.getKey();
+			}
+			else {
+				Map.Entry<Integer, Integer> sowResult = sowTurn(0,stonesAtHand,opponent);
+				stonesAtHand = sowResult.getValue();
+				sowToTurnOwner =  stonesAtHand > 0;
+				lastEditedPosition = 0;
+			}
+			
+		}
+		lastEditedPosition--;// last PostIncrenment neutralized
+		
+		return new AbstractMap.SimpleEntry<Integer,Boolean>(lastEditedPosition,!sowToTurnOwner);
 	}
 	
 	/**
@@ -134,9 +153,11 @@ public final class Game {
 	 * @param player
 	 * @return map entry, key is lastEditedPosition, value is remaining stone count
 	 */
-	private Map.Entry<Integer,Integer> sow(int startPoint, int stones, String player) {
+	private Map.Entry<Integer,Integer> sowTurn(int startPoint, int stones, String player) {
 		int lastEditedPosition;
-		for (lastEditedPosition=startPoint; startPoint < MANCALA_POSITION && stones > 0; lastEditedPosition++) {
+		//if sowing to opponent, no stones should be sown to mancala
+		int lastPositionToBeEdited = turn.equals(player) ? MANCALA_POSITION -1 : MANCALA_POSITION -2; 
+		for (lastEditedPosition=startPoint; lastEditedPosition <= lastPositionToBeEdited && stones > 0; lastEditedPosition++) {
 			board.get(player).set(lastEditedPosition, board.get(player).get(lastEditedPosition) + 1);
 			stones--;
 		}
