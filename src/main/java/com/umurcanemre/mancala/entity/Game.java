@@ -16,17 +16,17 @@ import lombok.Setter;
 @Setter
 public final class Game {
 	private static final int MANCALA_POSITION = 7;
-	private static final int ISC =6;// Initial stone/piece count
+	private static final int ISC = 6;// Initial stone/piece count
 	private List<String> players;
 	private Map<String, List<Integer>> board;
 	private String turn;
 	private boolean activeGame = true;
 
 	public Game(final String player1, final String player2) {
-		if(StringUtils.isBlank(player1) || StringUtils.isBlank(player2) || player1.equals(player2)) {
+		if (StringUtils.isBlank(player1) || StringUtils.isBlank(player2) || player1.equals(player2)) {
 			throw new IllegalArgumentException("Player names must be nonblank and distinct");
 		}
-		
+
 		players = Arrays.asList(player1, player2);
 		board = new LinkedHashMap<>();
 
@@ -45,6 +45,7 @@ public final class Game {
 	public static int getISC() {
 		return ISC;
 	}
+
 	/**
 	 * get the mancala position for game
 	 *
@@ -55,118 +56,89 @@ public final class Game {
 	}
 
 	public void makeMove(final String player, int cell) {
-		if(!isActiveGame()) {
+		if (!isActiveGame()) {
 			throw new IllegalStateException("This game has ended, you can not make any more moves");
-		}		
+		}
 		if (!turn.equals(player)) {
 			throw new IllegalStateException("Other player's turn");
 		}
-		if(cell< 1 || cell >= MANCALA_POSITION) {
+		if (cell < 1 || cell >= MANCALA_POSITION) {
 			throw new IllegalArgumentException("Invalid move");
 		}
-		cell = normalizeCellNo(player, cell);// Player 1's cell numbers are inverted
-		String opponent = players.get(1 - players.indexOf(player));
+		cell = normalizeCellNo(cell);// Player 1's cell numbers are inverted
 		if (board.get(player).get(cell).equals(0)) {
 			throw new IllegalStateException("Cannot play empty cell");
 		}
 
-		int stonesAtHand = pickChosenPitStones(player, cell);
+		String opponent = getOpponent();
+		int stonesAtHand = pickChosenPitStones(cell);
 
-		Map.Entry<Integer,Boolean> sowResult = sow(stonesAtHand, cell, player, opponent);
-		
+		Map.Entry<Integer, Boolean> sowResult = sow(stonesAtHand, cell);
+
 		int lastEditedPosition = sowResult.getKey();// last PostIncrenment neutralized
 		boolean sowToOpponent = sowResult.getValue();
-		
+
 		if (!sowToOpponent && lastEditedPosition != (MANCALA_POSITION - 1)
 				&& board.get(player).get(lastEditedPosition).equals(1)) {
-			capture(player, opponent, lastEditedPosition);
+			capture(lastEditedPosition);
 		}
-		
-		if (isGameOver(player)) {
+
+		if (checkIfGameOver()) {
 			collectOpponentStones(opponent);
 			turn = null;
-		}
-		else if(lastEditedPosition < MANCALA_POSITION - 1) {
+		} else if (lastEditedPosition < MANCALA_POSITION - 1) {
 			turn = opponent;
 		}
 	}
-	
-	private Map.Entry<Integer,Boolean> sow_old(int stonesAtHand, int cell, String player,String opponent){
-		int lastEditedPosition= cell + 1;
-		for (lastEditedPosition = cell + 1; lastEditedPosition < MANCALA_POSITION
-				&& stonesAtHand > 0; lastEditedPosition++) {
-			board.get(player).set(lastEditedPosition, board.get(player).get(lastEditedPosition) + 1);
-			stonesAtHand--;
-		}
 
-		boolean sowToOpponent = stonesAtHand > 0;
-		while (stonesAtHand > 0) {
-			if (sowToOpponent) {
-				for (lastEditedPosition = 0; lastEditedPosition < MANCALA_POSITION - 1
-						&& stonesAtHand > 0; lastEditedPosition++) {
-					board.get(opponent).set(lastEditedPosition, board.get(opponent).get(lastEditedPosition) + 1);
-					stonesAtHand--;
-				}
-				sowToOpponent = !(stonesAtHand > 0);
-			} else {
-				for (lastEditedPosition = 0; lastEditedPosition < MANCALA_POSITION
-						&& stonesAtHand > 0; lastEditedPosition++) {
-					board.get(player).set(lastEditedPosition, board.get(player).get(lastEditedPosition) + 1);
-					stonesAtHand--;
-				}
-				sowToOpponent = stonesAtHand > 0;
-			}
-		}
-		lastEditedPosition--;// last PostIncrenment neutralized
-		
-		return new AbstractMap.SimpleEntry<Integer,Boolean>(lastEditedPosition,sowToOpponent);
-	}
-
-	private Map.Entry<Integer,Boolean> sow(int stonesAtHand, int cell, String player,String opponent){
-		int lastEditedPosition= cell + 1;
+	private Map.Entry<Integer, Boolean> sow(int stonesAtHand,final int cell) {
+		int lastEditedPosition = cell + 1;
 
 		boolean sowToTurnOwner = true;
 		while (stonesAtHand > 0) {
 			if (sowToTurnOwner) {
-				Map.Entry<Integer, Integer> sowResult = sowTurn(lastEditedPosition,stonesAtHand,player);
+				Map.Entry<Integer, Integer> sowResult = sowTurn(lastEditedPosition, stonesAtHand, turn);
 				stonesAtHand = sowResult.getValue();
 				sowToTurnOwner = !(stonesAtHand > 0);
 				lastEditedPosition = sowResult.getKey();
-			}
-			else {
-				Map.Entry<Integer, Integer> sowResult = sowTurn(0,stonesAtHand,opponent);
+			} else {
+				Map.Entry<Integer, Integer> sowResult = sowTurn(0, stonesAtHand, getOpponent());
 				stonesAtHand = sowResult.getValue();
-				sowToTurnOwner =  stonesAtHand > 0;
+				sowToTurnOwner = stonesAtHand > 0;
 				lastEditedPosition = 0;
 			}
-			
 		}
 		lastEditedPosition--;// last PostIncrenment neutralized
-		
-		return new AbstractMap.SimpleEntry<Integer,Boolean>(lastEditedPosition,!sowToTurnOwner);
+
+		return new AbstractMap.SimpleEntry<Integer, Boolean>(lastEditedPosition, !sowToTurnOwner);
 	}
-	
+
 	/**
 	 * 
-	 * @param startPoint
-	 * @param stones
-	 * @param player
+	 * @param startPoint from which pit on will the stones will be sown
+	 * @param stones count of stones
+	 * @param player to who's side of board are stones sown
 	 * @return map entry, key is lastEditedPosition, value is remaining stone count
 	 */
-	private Map.Entry<Integer,Integer> sowTurn(int startPoint, int stones, String player) {
+	private Map.Entry<Integer, Integer> sowTurn(final int startPoint,int stones, final String player) {
 		int lastEditedPosition;
-		//if sowing to opponent, no stones should be sown to mancala
-		int lastPositionToBeEdited = turn.equals(player) ? MANCALA_POSITION -1 : MANCALA_POSITION -2; 
-		for (lastEditedPosition=startPoint; lastEditedPosition <= lastPositionToBeEdited && stones > 0; lastEditedPosition++) {
+		// if sowing to opponent, no stones should be sown to mancala
+		int lastPositionToBeEdited = turn.equals(player) ? MANCALA_POSITION - 1 : MANCALA_POSITION - 2;
+		for (lastEditedPosition = startPoint; lastEditedPosition <= lastPositionToBeEdited
+				&& stones > 0; lastEditedPosition++) {
 			board.get(player).set(lastEditedPosition, board.get(player).get(lastEditedPosition) + 1);
 			stones--;
 		}
-		return new AbstractMap.SimpleEntry<Integer,Integer>(lastEditedPosition,stones);
+		return new AbstractMap.SimpleEntry<Integer, Integer>(lastEditedPosition, stones);
 	}
-	
-	private int pickChosenPitStones(final String player, final int cell) {
-		int stones = board.get(player).get(cell);
-		board.get(player).set(cell, 0);
+
+	private String getOpponent() {
+		return players.get(1 - players.indexOf(turn));
+	}
+
+	private int pickChosenPitStones(final int cell) {
+		int stones = board.get(turn).get(cell);
+		board.get(turn).set(cell, 0);
 		return stones;
 	}
 
@@ -179,27 +151,37 @@ public final class Game {
 		board.get(opponent).set(MANCALA_POSITION - 1, remainingStones);
 	}
 
-	private boolean isGameOver(final String player) {
-		for (int i = 0; activeGame && i < MANCALA_POSITION - 1; i++) {
-			if (board.get(player).get(i) > 0) {
-				return false;
+	private boolean checkIfGameOver() {
+		if (!activeGame) {
+			return true;
+		}
+		for (String player : players) {
+			activeGame = activeGame && playerHasStones(player);
+		}
+
+		return !activeGame;
+	}
+
+	private boolean playerHasStones(final String player) {
+		for (int i = 0; i < MANCALA_POSITION - 1; i++) {
+			if (board.get(turn).get(i) > 0) {
+				return true;
 			}
 		}
-		activeGame = false;
-		return true;
+		return false;
 	}
 
-	private void capture(String player, String opponent, int lastEditedPosition) {
+	private void capture(final int lastEditedPosition) {
 		int capturedStones = 0;
-		capturedStones += board.get(player).get(lastEditedPosition);
-		board.get(player).set(lastEditedPosition, 0);
-		capturedStones += board.get(opponent).get((MANCALA_POSITION - 1) - lastEditedPosition - 1);
-		board.get(opponent).set((MANCALA_POSITION - 1) - lastEditedPosition - 1, 0);
-		board.get(player).set(MANCALA_POSITION - 1, board.get(player).get(MANCALA_POSITION - 1) + capturedStones);
+		capturedStones += board.get(turn).get(lastEditedPosition);
+		board.get(turn).set(lastEditedPosition, 0);
+		capturedStones += board.get(getOpponent()).get((MANCALA_POSITION - 1) - lastEditedPosition - 1);
+		board.get(getOpponent()).set((MANCALA_POSITION - 1) - lastEditedPosition - 1, 0);
+		board.get(turn).set(MANCALA_POSITION - 1, board.get(turn).get(MANCALA_POSITION - 1) + capturedStones);
 	}
 
-	private int normalizeCellNo(final String player, int cell) {
-		boolean isP1 = players.indexOf(player) == 0;
+	private int normalizeCellNo(int cell) {
+		boolean isP1 = players.indexOf(turn) == 0;
 		if (isP1) {
 			cell = MANCALA_POSITION - cell;
 		}
@@ -213,7 +195,8 @@ public final class Game {
 		List<Integer> playersBoard = boardIterator.next();
 
 		// PLAYER1's Board
-		builder.append(String.format("<table><tr><th>Player "+this.getPlayers().get(0)+"</th><th>%2d</th>", playersBoard.get(playersBoard.size() - 1)));
+		builder.append(String.format("<table><tr><th>Player " + this.getPlayers().get(0) + "</th><th>%2d</th>",
+				playersBoard.get(playersBoard.size() - 1)));
 		for (int i = 2; i <= playersBoard.size(); i++) {
 			builder.append(String.format("<th>%2d</th>", playersBoard.get(playersBoard.size() - i)));
 		}
@@ -221,7 +204,7 @@ public final class Game {
 
 		// PLAYER2's Board
 		playersBoard = boardIterator.next();
-		builder.append("<tr><th>Player "+this.getPlayers().get(1)+"</th><th></th>");
+		builder.append("<tr><th>Player " + this.getPlayers().get(1) + "</th><th></th>");
 		for (int i = 0; i < playersBoard.size() - 1; i++) {
 			builder.append(String.format("<th>%2d</th>", playersBoard.get(i)));
 		}
