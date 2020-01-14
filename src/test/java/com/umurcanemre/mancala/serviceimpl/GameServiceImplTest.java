@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.umurcanemre.mancala.entity.GameTest;
 import com.umurcanemre.mancala.helper.StaticTestCase;
-
-import service.GameService;
+import com.umurcanemre.mancala.service.GameService;
 
 public class GameServiceImplTest {
 	private GameService gameService = new GameServiceImpl();

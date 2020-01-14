@@ -1,15 +1,16 @@
 package com.umurcanemre.mancala.serviceimpl;
 
-import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.umurcanemre.mancala.service.GameService;
+import com.umurcanemre.mancala.service.LobbyService;
+
 import lombok.AllArgsConstructor;
-import service.GameService;
-import service.LobbyService;
 
 @Service
 @AllArgsConstructor

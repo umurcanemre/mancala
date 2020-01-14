@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import service.GameService;
+import com.umurcanemre.mancala.service.GameService;
 
 public class LobbyServiceImplTest {
 	private GameService mockGameService = Mockito.mock(GameServiceImpl.class);

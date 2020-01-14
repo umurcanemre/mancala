@@ -6,8 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 import com.umurcanemre.mancala.entity.Game;
-
-import service.GameService;
+import com.umurcanemre.mancala.service.GameService;
 
 @Service
 public class GameServiceImpl implements GameService {
