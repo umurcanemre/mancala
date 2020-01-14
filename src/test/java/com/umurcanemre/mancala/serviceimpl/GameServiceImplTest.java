@@ -56,13 +56,9 @@ public class GameServiceImplTest {
 	
 	@Test
 	public void displayGameTest() {
-
 		assertEquals(0, gameService.activeGameCount());
 		gameService.initiateGame(0L, P1, P2);
 		GameTest.assertDisplayResult(gameService.displayGame(0L));
-		
-		
-		//TODO: make a finished game scenario, and see test that too
 	}
 	
 	@Test
@@ -88,8 +84,20 @@ public class GameServiceImplTest {
 		assertEquals(0, gameService.activeGameCount());
 		// not initiating game -> gameService.initiateGame(0L, P1, P2);
 		assertThrows(IllegalArgumentException.class, ()-> gameService.makeMove(0L, P1, 3));
+	}
+	
+	@Test
+	public void makeMoveTest_finishedGame() {
+		assertEquals(0, gameService.activeGameCount());
+		gameService.initiateGame(0L, P1, P2);
 		
-		//TODO; test makemove on a finished game
+		for(int[] move : StaticTestCase.realGameMoves()) {
+			gameService.makeMove(0L, move[0] == 1? P1 :P2, move[1]);
+		}
+		assertEquals(1, gameService.finishedGameCount());
+		assertEquals(0, gameService.activeGameCount());
+		
+		assertThrows(IllegalArgumentException.class,()-> gameService.makeMove(0L, P1, 3));//random, doesn't matter
 	}
 	
 	@Test
@@ -112,7 +120,6 @@ public class GameServiceImplTest {
 		gameService.initiateGame(0L, P1, P2);
 		
 		for(int[] move : StaticTestCase.realGameMoves()) {
-			System.out.println(move[0] + " " +move[1]);
 			gameService.makeMove(0L, move[0] == 1? P1 :P2, move[1]);
 		}
 		

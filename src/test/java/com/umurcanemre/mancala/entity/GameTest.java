@@ -71,6 +71,38 @@ public class GameTest {
 		assertEquals(2, displayedResult.split("0").length); // 2 0s split the text to 2 pieces(second one at the end)
 	}
 
+	@Test //conquer happens when last stone ends in an empty pit and opponents corresponding pit also is not empty
+	public void makeMoveTest_concuquerScenario_opponentSideEmpty() {
+		// manipulate the table to conditions
+		game.getBoard().put(p1Name, Arrays.asList(Game.getISC(), Game.getISC(), Game.getISC(), 1, 0, Game.getISC(), 0));
+		game.getBoard().put(p2Name, Arrays.asList(Game.getISC(), 0, Game.getISC(), Game.getISC(), Game.getISC(), Game.getISC(), 0));
+
+		game.makeMove(p1Name, 3);//no conquer
+
+		// 7 stone pieces collected to p1's mancala
+		assertEquals(0, game.getBoard().get(p1Name).get(Game.getMancalaPosition() - 1));
+
+		// for p1, except for conquered cell and moved cell, all cells should be as it
+		// was
+		for (int i = 0; i < Game.getMancalaPosition() - 1; i++) {
+			if (i != 3 && i != 4) {
+				assertEquals(Game.getISC(), game.getBoard().get(p1Name).get(i));
+			} else if (i == 3 ) {// conquered cell and moved cell should have 0 stones
+				assertEquals(0, game.getBoard().get(p1Name).get(i));
+			} else if (i == 4 ) {// conquered cell and moved cell should have 0 stones
+				assertEquals(1, game.getBoard().get(p1Name).get(i));
+			}
+		}
+
+		// for p2, except for conquered cell, all cells should be as it was
+		for (int i = 0; i < Game.getMancalaPosition() - 1; i++) {
+			if (i != 1) {
+				assertEquals(Game.getISC(), game.getBoard().get(p2Name).get(i));
+			} else {// conquered cell should have 0 stones
+				assertEquals(0, game.getBoard().get(p2Name).get(i));
+			}
+		}
+	}
 	@Test
 	public void makeMoveTest_concuquerScenario() {
 		// manipulate the table to conquer conditions

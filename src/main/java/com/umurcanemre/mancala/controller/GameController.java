@@ -27,6 +27,7 @@ public class GameController {
 	@GetMapping(value = "makemove/{gameId}/{player}/{move}")
 	public String displayGame(@PathVariable long gameId, @PathVariable String player, @PathVariable int move) {
 		gameService.makeMove(gameId, player, move);
+		System.out.println("{"+player+","+move+"},");
 		return gameService.displayGame(gameId);
 	}
 	

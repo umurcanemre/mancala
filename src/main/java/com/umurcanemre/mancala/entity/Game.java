@@ -79,7 +79,8 @@ public final class Game {
 		boolean sowToOpponent = sowResult.getValue();
 
 		if (!sowToOpponent && lastEditedPosition != (MANCALA_POSITION - 1)
-				&& board.get(player).get(lastEditedPosition).equals(1)) {
+				&& board.get(player).get(lastEditedPosition).equals(1) 
+				&& board.get(opponent).get(getOpponentCellCorrespondance(lastEditedPosition)).compareTo(0) > 0) {
 			capture(lastEditedPosition);
 		}
 
@@ -175,8 +176,8 @@ public final class Game {
 		int capturedStones = 0;
 		capturedStones += board.get(turn).get(lastEditedPosition);
 		board.get(turn).set(lastEditedPosition, 0);
-		capturedStones += board.get(getOpponent()).get((MANCALA_POSITION - 1) - lastEditedPosition - 1);
-		board.get(getOpponent()).set((MANCALA_POSITION - 1) - lastEditedPosition - 1, 0);
+		capturedStones += board.get(getOpponent()).get(getOpponentCellCorrespondance(lastEditedPosition));
+		board.get(getOpponent()).set(getOpponentCellCorrespondance(lastEditedPosition), 0);
 		board.get(turn).set(MANCALA_POSITION - 1, board.get(turn).get(MANCALA_POSITION - 1) + capturedStones);
 	}
 
@@ -187,6 +188,10 @@ public final class Game {
 		}
 		return cell - 1;// from this point on, cell position is in array convention (first cell's
 						// address 0)
+	}
+	
+	private int getOpponentCellCorrespondance(final int cell) {
+		return (MANCALA_POSITION - 1) - cell - 1;
 	}
 
 	public String displayBoard() {
