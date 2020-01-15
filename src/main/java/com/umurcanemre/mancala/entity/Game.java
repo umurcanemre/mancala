@@ -79,20 +79,20 @@ public final class Game {
 		boolean sowToOpponent = sowResult.getValue();
 
 		if (!sowToOpponent && lastEditedPosition != (MANCALA_POSITION - 1)
-				&& board.get(player).get(lastEditedPosition).equals(1) 
+				&& board.get(player).get(lastEditedPosition).equals(1)
 				&& board.get(opponent).get(getOpponentCellCorrespondance(lastEditedPosition)).compareTo(0) > 0) {
 			capture(lastEditedPosition);
 		}
 
 		if (checkIfGameOver()) {
-			collectOpponentStones(opponent);
+			collectAllStonesToMancalas();
 			turn = null;
 		} else if (lastEditedPosition < MANCALA_POSITION - 1) {
 			turn = opponent;
 		}
 	}
 
-	private Map.Entry<Integer, Boolean> sow(int stonesAtHand,final int cell) {
+	private Map.Entry<Integer, Boolean> sow(int stonesAtHand, final int cell) {
 		int lastEditedPosition = cell + 1;
 
 		boolean sowToTurnOwner = true;
@@ -111,26 +111,25 @@ public final class Game {
 		}
 		lastEditedPosition--;// last PostIncrenment neutralized
 
-		return new AbstractMap.SimpleEntry<Integer, Boolean>(lastEditedPosition, !sowToTurnOwner);
+		return new AbstractMap.SimpleEntry<>(lastEditedPosition, !sowToTurnOwner);
 	}
 
 	/**
 	 * 
 	 * @param startPoint from which pit on will the stones will be sown
-	 * @param stones count of stones
-	 * @param player to who's side of board are stones sown
+	 * @param stones     count of stones
+	 * @param player     to who's side of board are stones sown
 	 * @return map entry, key is lastEditedPosition, value is remaining stone count
 	 */
-	private Map.Entry<Integer, Integer> sowTurn(final int startPoint,int stones, final String player) {
+	private Map.Entry<Integer, Integer> sowTurn(final int startPoint, int stones, final String player) {
 		int lastEditedPosition;
 		// if sowing to opponent, no stones should be sown to mancala
 		int lastPositionToBeEdited = turn.equals(player) ? MANCALA_POSITION - 1 : MANCALA_POSITION - 2;
 		for (lastEditedPosition = startPoint; lastEditedPosition <= lastPositionToBeEdited
-				&& stones > 0; lastEditedPosition++) {
+				&& stones-- > 0; lastEditedPosition++) {
 			board.get(player).set(lastEditedPosition, board.get(player).get(lastEditedPosition) + 1);
-			stones--;
 		}
-		return new AbstractMap.SimpleEntry<Integer, Integer>(lastEditedPosition, stones);
+		return new AbstractMap.SimpleEntry<>(lastEditedPosition, stones);
 	}
 
 	private String getOpponent() {
@@ -143,13 +142,19 @@ public final class Game {
 		return stones;
 	}
 
-	private void collectOpponentStones(final String opponent) {
+	/**
+	 * In the event where game is ended (and one side of the board is empty but the
+	 * mancala), all
+	 */
+	private void collectAllStonesToMancalas() {
 		int remainingStones = 0;
-		for (int i = 0; i < MANCALA_POSITION; i++) {
-			remainingStones += board.get(opponent).get(i);
-			board.get(opponent).set(i, 0);
+		for (String player : players) {
+			for (int i = 0; i < MANCALA_POSITION; i++) {
+				remainingStones += board.get(player).get(i);
+				board.get(player).set(i, 0);
+			}
+			board.get(player).set(MANCALA_POSITION - 1, remainingStones);
 		}
-		board.get(opponent).set(MANCALA_POSITION - 1, remainingStones);
 	}
 
 	private boolean checkIfGameOver() {
@@ -165,7 +170,7 @@ public final class Game {
 
 	private boolean playerHasStones(final String player) {
 		for (int i = 0; i < MANCALA_POSITION - 1; i++) {
-			if (board.get(turn).get(i) > 0) {
+			if (board.get(player).get(i) > 0) {
 				return true;
 			}
 		}
@@ -189,7 +194,7 @@ public final class Game {
 		return cell - 1;// from this point on, cell position is in array convention (first cell's
 						// address 0)
 	}
-	
+
 	private int getOpponentCellCorrespondance(final int cell) {
 		return (MANCALA_POSITION - 1) - cell - 1;
 	}
@@ -229,9 +234,9 @@ public final class Game {
 			int p2Point = board.get(players.get(1)).get(MANCALA_POSITION - 1);
 			String winner;
 			if (p1Point > p2Point) {
-				winner = "Winner is P1";
+				winner = "Winner is " + players.get(0);
 			} else if (p1Point < p2Point) {
-				winner = "Winner is P2";
+				winner = "Winner is " + players.get(1);
 			} else {
 				winner = "Stalemate";
 			}

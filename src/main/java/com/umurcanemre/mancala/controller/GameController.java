@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import service.GameService;
+import com.umurcanemre.mancala.service.GameService;
 
 @RestController
 @RequestMapping(value = "game/")
@@ -24,10 +24,11 @@ public class GameController {
 		return gameService.displayGame(gameId);
 	}
 	
+
+	//This normally would have been a POST but for testing easily through browser, went with GET method
 	@GetMapping(value = "makemove/{gameId}/{player}/{move}")
-	public String displayGame(@PathVariable long gameId, @PathVariable String player, @PathVariable int move) {
+	public String makeMove(@PathVariable long gameId, @PathVariable String player, @PathVariable int move) {
 		gameService.makeMove(gameId, player, move);
-		System.out.println("{"+player+","+move+"},");
 		return gameService.displayGame(gameId);
 	}
 	

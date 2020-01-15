@@ -30,8 +30,8 @@ public class GameServiceImplTest {
 		
 		for(int i=0; i<gamesToInit; i++) {
 			gameService.initiateGame(Long.valueOf(i), PLAYERPREFIX+(i*2), PLAYERPREFIX+((i*2)+1));
+			assertEquals(i, gameService.activeGameCount());
 		}
-		assertEquals(gamesToInit, gameService.activeGameCount());
 	}
 	
 	@Test
@@ -94,8 +94,9 @@ public class GameServiceImplTest {
 			gameService.makeMove(0L, move[0] == 1? P1 :P2, move[1]);
 		}
 		assertEquals(1, gameService.finishedGameCount());
-		assertEquals(0, gameService.activeGameCount());
+		assertEquals(0, gameService.activeGameCount());//Game starts and plays as expected
 		
+		//after game finished, make move should't be allowed
 		assertThrows(IllegalArgumentException.class,()-> gameService.makeMove(0L, P1, 3));//random, doesn't matter
 	}
 	
