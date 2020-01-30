@@ -1,1 +1,3 @@
-Main-Class: com/umurcanemre/mancala/MancalaApplication
+Manifest-Version: 1.0
+Main-Class: com.umurcanemre.mancala.MancalaApplication
+
