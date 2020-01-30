@@ -30,7 +30,7 @@ public class GameServiceImplTest {
 		
 		for(int i=0; i<gamesToInit; i++) {
 			gameService.initiateGame(Long.valueOf(i), PLAYERPREFIX+(i*2), PLAYERPREFIX+((i*2)+1));
-			assertEquals(i, gameService.activeGameCount());
+			assertEquals(i+1, gameService.activeGameCount());
 		}
 	}
 	
