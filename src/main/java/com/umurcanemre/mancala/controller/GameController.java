@@ -19,6 +19,11 @@ public class GameController {
 		return gameService.isGameStarted(gameId) ? "Started" : "Waiting for opponent";
 	}
 	
+	@GetMapping
+	public String trysmt() {
+		return "Jenkins with GH hook try";
+	}
+	
 	@GetMapping(value = "display/{gameId}")
 	public String displayGame(@PathVariable long gameId) {
 		return gameService.displayGame(gameId);
