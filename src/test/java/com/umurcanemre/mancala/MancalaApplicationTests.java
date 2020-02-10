@@ -10,10 +10,5 @@ class MancalaApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-	
-	@Test
-	void mainRuns() {
-		new MancalaApplication().main(Arrays.array(""));
-	}
 
 }
