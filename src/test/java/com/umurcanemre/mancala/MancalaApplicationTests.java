@@ -7,8 +7,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class MancalaApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+	//@Test
+	//void contextLoads() {
+	//}
+	//
+	//@Test
+	//void mainRuns() {
+	//	new MancalaApplication().main(Arrays.array(""));
+	//}
+    //
 }
